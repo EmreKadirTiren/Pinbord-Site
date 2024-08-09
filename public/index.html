@@ -3,17 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sticky Note Board</title>
+    <title>Pinboard</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <div class="controls">
-        <button id="arrow-mode-btn">Toggle Arrow Mode</button>
-    </div>
-    <div id="board-container">
-        <div id="board"></div>
-        <svg id="arrow-canvas"></svg>
-    </div>
+    <button id="arrow-mode-btn">Toggle Arrow Mode</button>
+    <div id="board"></div>
+    <svg id="arrow-canvas"></svg> <!-- SVG canvas for arrows -->
 
     <script src="/socket.io/socket.io.js"></script>
     <script src="script.js"></script>

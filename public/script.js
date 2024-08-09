@@ -1,7 +1,6 @@
 const board = document.getElementById('board');
 const arrowCanvas = document.getElementById('arrow-canvas');
 const arrowModeBtn = document.getElementById('arrow-mode-btn');
-const boardContainer = document.getElementById('board-container');
 const socket = io();
 
 let arrowMode = false;
@@ -18,32 +17,6 @@ arrowModeBtn.addEventListener('click', () => {
         firstNote = null;
     }
 });
-
-// Make the board container draggable
-boardContainer.onmousedown = function(e) {
-    let shiftX = e.clientX - boardContainer.getBoundingClientRect().left;
-    let shiftY = e.clientY - boardContainer.getBoundingClientRect().top;
-
-    function moveAt(pageX, pageY) {
-        boardContainer.style.left = pageX - shiftX + 'px';
-        boardContainer.style.top = pageY - shiftY + 'px';
-    }
-
-    function onMouseMove(event) {
-        moveAt(event.pageX, event.pageY);
-    }
-
-    document.addEventListener('mousemove', onMouseMove);
-
-    boardContainer.onmouseup = function() {
-        document.removeEventListener('mousemove', onMouseMove);
-        boardContainer.onmouseup = null;
-    };
-
-    boardContainer.ondragstart = function() {
-        return false;
-    };
-};
 
 // Function to create and append sticky notes to the board
 function createNoteElement(note) {
@@ -64,16 +37,10 @@ function createNoteElement(note) {
     editButton.className = 'edit-note';
     noteElement.appendChild(editButton);
 
-    const deleteButton = document.createElement('button');
-    deleteButton.textContent = 'Delete';
-    deleteButton.className = 'delete-note';
-    noteElement.appendChild(deleteButton);
-
     const colorPicker = document.createElement('input');
     colorPicker.type = 'color';
     colorPicker.className = 'color-picker';
     colorPicker.value = note.color || '#ffeb3b';
-    colorPicker.style.display = 'block';
     noteElement.appendChild(colorPicker);
 
     const submitButton = document.createElement('button');
@@ -84,11 +51,11 @@ function createNoteElement(note) {
 
     noteElement.dataset.id = note._id;
 
-    noteElement.onmousedown = function(e) {
+    noteElement.onmousedown = function (e) {
         dragNoteElement(e, noteElement);
     };
 
-    editButton.addEventListener('click', function() {
+    editButton.addEventListener('click', function () {
         contentDiv.contentEditable = true;
         colorPicker.style.display = 'block';
         submitButton.style.display = 'inline-block';
@@ -96,7 +63,7 @@ function createNoteElement(note) {
         noteElement.style.cursor = 'default';
     });
 
-    submitButton.addEventListener('click', function() {
+    submitButton.addEventListener('click', function () {
         const updatedNote = {
             _id: note._id,
             x: parseInt(noteElement.style.left),
@@ -114,13 +81,8 @@ function createNoteElement(note) {
         noteElement.style.cursor = 'grab';
     });
 
-    deleteButton.addEventListener('click', function() {
-        socket.emit('deleteNote', { _id: note._id });
-        board.removeChild(noteElement);
-    });
-
     // Handle click for arrow creation
-    noteElement.addEventListener('click', function() {
+    noteElement.addEventListener('click', function () {
         if (arrowMode) {
             if (!firstNote) {
                 firstNote = noteElement;
@@ -144,7 +106,7 @@ function createArrow(startNote, endNote) {
     arrow.setAttribute('stroke', 'black');
     arrow.setAttribute('marker-end', 'url(#arrowhead)');
 
-    arrow.addEventListener('click', function() {
+    arrow.addEventListener('click', function () {
         deleteArrow(arrow);
     });
 
@@ -179,12 +141,12 @@ function dragNoteElement(e, noteElement) {
 
     document.addEventListener('mousemove', onMouseMove);
 
-    noteElement.onmouseup = function() {
+    noteElement.onmouseup = function () {
         document.removeEventListener('mousemove', onMouseMove);
         noteElement.onmouseup = null;
     };
 
-    noteElement.ondragstart = function() {
+    noteElement.ondragstart = function () {
         return false;
     };
 }
@@ -204,7 +166,7 @@ socket.on('loadNotes', notes => {
 socket.on('newNote', createNoteElement);
 
 // Handle notes being updated
-socket.on('updateNote', function(updatedNote) {
+socket.on('updateNote', function (updatedNote) {
     const noteElement = document.querySelector(`[data-id="${updatedNote._id}"]`);
     if (noteElement) {
         noteElement.style.left = `${updatedNote.x}px`;
@@ -215,18 +177,42 @@ socket.on('updateNote', function(updatedNote) {
     }
 });
 
-// Handle deleting notes
-socket.on('deleteNote', function(deletedNoteId) {
-    const noteElement = document.querySelector(`[data-id="${deletedNoteId}"]`);
-    if (noteElement) {
+// Handle adding new arrows
+board.addEventListener('dblclick', function (e) {
+    const noteElement = document.createElement('div');
+    noteElement.className = 'sticky-note';
+    noteElement.style.left = `${e.clientX}px`;
+    noteElement.style.top = `${e.clientY}px`;
+
+    const contentDiv = document.createElement('div');
+    contentDiv.className = 'content';
+    contentDiv.contentEditable = true;
+    noteElement.appendChild(contentDiv);
+
+    const colorPicker = document.createElement('input');
+    colorPicker.type = 'color';
+    colorPicker.className = 'color-picker';
+    colorPicker.value = '#ffeb3b';
+    colorPicker.style.display = 'block';
+    noteElement.appendChild(colorPicker);
+
+    const submitButton = document.createElement('button');
+    submitButton.textContent = 'Save';
+    submitButton.className = 'submit-note';
+    noteElement.appendChild(submitButton);
+
+    board.appendChild(noteElement);
+
+    submitButton.addEventListener('click', function () {
+        const note = {
+            x: e.clientX,
+            y: e.clientY,
+            type: 'text',
+            content: contentDiv.innerText,
+            color: colorPicker.value,
+        };
+        socket.emit('addNote', note);
         board.removeChild(noteElement);
-    }
-    arrows = arrows.filter(({ arrow, startNote, endNote }) => {
-        if (startNote.dataset.id === deletedNoteId || endNote.dataset.id === deletedNoteId) {
-            deleteArrow(arrow);
-            return false;
-        }
-        return true;
     });
 });
 

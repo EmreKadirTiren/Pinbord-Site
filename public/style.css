@@ -5,26 +5,62 @@ body {
     overflow: hidden;
 }
 
-.controls {
-    position: fixed;
-    top: 10px;
-    left: 10px;
-    z-index: 1000;
-}
-
-#board-container {
+#board {
     width: 100%;
     height: 100vh;
-    overflow: hidden;
     position: relative;
-    cursor: grab;
+    background: #f7f7f7;
+    overflow: hidden;
 }
 
-#board {
-    width: 3000px;
-    height: 3000px;
-    background: #f7f7f7;
-    position: relative;
+.sticky-note {
+    position: absolute;
+    width: 200px;
+    height: 150px;
+    background-color: #ffeb3b;
+    padding: 10px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    cursor: grab;
+    display: flex;
+    flex-direction: column;
+    color: #333; /* Text color */
+    font-size: 14px;
+    line-height: 1.5;
+    overflow: hidden;
+}
+
+.sticky-note .content {
+    flex-grow: 1;
+    overflow-y: auto;
+    outline: none;
+}
+
+.sticky-note img {
+    width: 100%;
+    height: auto;
+    display: block;
+    margin-bottom: auto;
+}
+
+.sticky-note .submit-note,
+.sticky-note .edit-note {
+    margin-top: auto;
+    align-self: flex-end;
+    margin-left: 5px;
+}
+
+.color-picker {
+    margin-top: auto;
+    align-self: flex-end;
+    margin-bottom: 10px;
+    display: none; /* Initially hidden */
+}
+
+#arrow-mode-btn {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    z-index: 100;
 }
 
 #arrow-canvas {
@@ -33,47 +69,24 @@ body {
     left: 0;
     width: 100%;
     height: 100%;
+    pointer-events: none; /* Allows clicks to pass through to the sticky notes */
 }
 
-.sticky-note {
-    position: absolute;
-    width: 200px;
-    height: 150px;
-    padding: 10px;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    cursor: grab;
-    display: flex;
-    flex-direction: column;
-    background-color: #ffeb3b;
+.arrow {
+    stroke-width: 2;
+    pointer-events: visibleStroke;
 }
 
-.content {
-    flex-grow: 1;
-    cursor: text;
-}
-
-.edit-note {
-    margin-top: auto;
-    align-self: flex-end;
-}
-
-.submit-note, .delete-note {
-    margin-top: 10px;
-    align-self: flex-end;
-    display: inline-block;
-}
-
-.color-picker {
-    margin-top: 10px;
-    align-self: flex-end;
+.arrow.active {
+    stroke: red;
+    cursor: pointer;
 }
 
 .arrow-options {
     position: absolute;
-    z-index: 1000;
-    background: #fff;
+    background: white;
     border: 1px solid #ccc;
     padding: 5px;
-    display: flex;
-    gap: 5px;
+    display: none;
+    z-index: 101;
 }
