@@ -20,6 +20,7 @@ const noteSchema = new mongoose.Schema({
     content: String,   // Content of the note (text or image URL)
     x: Number,         // X position of the note on the board
     y: Number,         // Y position of the note on the board
+    color: String,     // Background color of the note
 });
 
 // Create a Mongoose model based on the schema
@@ -41,9 +42,19 @@ io.on('connection', (socket) => {
             io.emit('newNote', savedNote);  // Broadcast the new note to all clients
         });
     });
+
+    // Handle updating an existing note
+    socket.on('updateNote', (updatedNote) => {
+        Note.findByIdAndUpdate(updatedNote._id, updatedNote, { new: true })
+            .then(savedNote => {
+                io.emit('updateNote', savedNote);  // Broadcast the updated note to all clients
+            });
+    });
 });
+
 
 // Start the server
 server.listen(3000, () => {
     console.log('Server is running on http://localhost:3000');
 });
+

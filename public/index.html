@@ -4,116 +4,12 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Pinboard</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 0;
-            padding: 0;
-            overflow: hidden;
-        }
-
-        #board {
-            width: 100%;
-            height: 100vh;
-            position: relative;
-            background: #f7f7f7;
-            overflow: hidden;
-        }
-
-        .sticky-note {
-            position: absolute;
-            width: 200px;
-            height: 150px;
-            background: #ffeb3b;
-            padding: 10px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-            cursor: grab;
-            display: flex;
-            flex-direction: column;
-        }
-
-        .sticky-note textarea {
-            width: 100%;
-            height: 70%;
-            resize: none;
-            border: none;
-            background: none;
-            outline: none;
-        }
-
-        .sticky-note img {
-            width: 100%;
-            height: auto;
-            display: block;
-            margin-bottom: auto;
-        }
-
-        .sticky-note .submit-note {
-            margin-top: auto;
-            align-self: flex-end;
-        }
-    </style>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
     <div id="board"></div>
 
     <script src="/socket.io/socket.io.js"></script>
-    <script>
-        const board = document.getElementById('board');
-        const socket = io();
-
-        function createNoteElement(note) {
-            const noteElement = document.createElement('div');
-            noteElement.className = 'sticky-note';
-            noteElement.style.left = `${note.x}px`;
-            noteElement.style.top = `${note.y}px`;
-
-            if (note.type === 'text') {
-                const textarea = document.createElement('textarea');
-                textarea.value = note.content;
-                noteElement.appendChild(textarea);
-            } else if (note.type === 'image') {
-                const img = document.createElement('img');
-                img.src = note.content;
-                noteElement.appendChild(img);
-            }
-
-            board.appendChild(noteElement);
-        }
-
-        socket.on('loadNotes', notes => {
-            notes.forEach(createNoteElement);
-        });
-
-        socket.on('newNote', createNoteElement);
-
-        board.addEventListener('dblclick', function(e) {
-            const noteElement = document.createElement('div');
-            noteElement.className = 'sticky-note';
-            noteElement.style.left = `${e.clientX}px`;
-            noteElement.style.top = `${e.clientY}px`;
-
-            const textarea = document.createElement('textarea');
-            noteElement.appendChild(textarea);
-
-            const submitButton = document.createElement('button');
-            submitButton.textContent = 'Save';
-            submitButton.className = 'submit-note';
-            noteElement.appendChild(submitButton);
-
-            board.appendChild(noteElement);
-
-            submitButton.addEventListener('click', function() {
-                const note = {
-                    x: e.clientX,
-                    y: e.clientY,
-                    type: 'text',
-                    content: textarea.value,
-                };
-                socket.emit('addNote', note);
-                board.removeChild(noteElement);
-            });
-        });
-    </script>
+    <script src="script.js"></script>
 </body>
 </html>
